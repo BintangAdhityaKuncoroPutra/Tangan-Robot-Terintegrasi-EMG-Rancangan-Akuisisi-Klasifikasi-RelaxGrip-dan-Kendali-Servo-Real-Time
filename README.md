@@ -157,19 +157,19 @@ Nilai akhir ditetapkan setelah fs aktual dan bandwidth analog sensor diketahui *
 
 ### Filter kausal
 
-Filter kausal hanya memakai sampel saat ini dan masa lalu. Untuk filter IIR dengan \(a_0=1\), bentuk umumnya:
+Filter kausal hanya memakai sampel saat ini dan masa lalu. Untuk filter IIR dengan $a_0=1$, bentuk umumnya:
+
 $$
-\[
 y[n]=\sum_{k=0}^{M}b_kx[n-k]-\sum_{k=1}^{L}a_ky[n-k].
-\]
 $$
+
 Di sini:
-$$
-- \(x[n]\): input filter;
-- \(y[n]\): output filter;
-- \(b_k,a_k\): koefisien;
-- \(M,L\): jumlah lag yang digunakan.
-$$
+
+- $x[n]$: input filter;
+- $y[n]$: output filter;
+- $b_k,a_k$: koefisien;
+- $M,L$: jumlah lag yang digunakan.
+
 Keadaan filter perlu diteruskan antarblok. Memulai ulang filter pada setiap blok dapat menghasilkan transien berulang. SciPy menyediakan pemrosesan berbasis second-order sections melalui `sosfilt` [3].
 
 Pemrosesan maju–mundur seperti `filtfilt` tidak boleh dijadikan pengganti filter real-time, karena memerlukan sampel dari kedua arah waktu.
@@ -179,12 +179,12 @@ Pemrosesan maju–mundur seperti `filtfilt` tidak boleh dijadikan pengganti filt
 ### Frekuensi sampling membatasi rancangan
 
 Frekuensi tertinggi yang dapat direpresentasikan tanpa ambiguitas pada sampling seragam dibatasi oleh Nyquist:
+
 $$
-\[
 f_\mathrm{Nyquist}=\frac{f_s}{2}.
-\]
 $$
-Sebagai ilustrasi matematika, jika %%\(f_s=500\)$$ Hz, Nyquist adalah 250 Hz. Ini bukan pernyataan bahwa sistem telah mencapai sampling 500 Hz. Kode harus menolak cutoff ≥ Nyquist dari fs yang dikonfigurasi.
+
+Sebagai ilustrasi matematika, jika $f_s=500$ Hz, Nyquist adalah 250 Hz. Ini bukan pernyataan bahwa sistem telah mencapai sampling 500 Hz. Kode harus menolak cutoff ≥ Nyquist dari fs yang dikonfigurasi.
 
 Filter analog sebelum ADC juga perlu diperiksa. Filter digital tidak menghapus aliasing yang sudah terjadi saat sampling.
 
@@ -195,18 +195,18 @@ Filter analog sebelum ADC juga perlu diperiksa. Filter digital tidak menghapus a
 - **Delay grup:** menunjukkan keterlambatan komponen sinyal akibat filter.
 - **PSD Welch:** membantu membandingkan distribusi daya sebelum dan sesudah pemrosesan [3].
 
-Notch dirancang untuk meredam pita sempit. Pada notch, hubungan faktor kualitas adalah \(Q=f_0/BW\) [3].
+Notch dirancang untuk meredam pita sempit. Pada notch, hubungan faktor kualitas adalah $Q=f_0/BW$ [3].
 
 Delay grup pada tepat zero notch dapat tidak terdefinisi [3]. Nilai numerik nol pada titik tersebut tidak boleh dipakai sebagai bukti bahwa filter tidak menimbulkan delay.
 
 Jika envelope dibentuk dengan penyearahan, rantai lengkap tersebut mengandung operasi nonlinear. Jangan menyajikan satu Bode seolah seluruh rantai adalah sistem linear.
 
 **Usulan metode redaman 50 Hz:**
+
 $$
-\[
 A_{50}=10\log_{10}\frac{\int_{49}^{51}P_\mathrm{sebelum}(f)\,df}{\int_{49}^{51}P_\mathrm{sesudah}(f)\,df}\ \text{dB},
-\]
 $$
+
 dihitung dari rekaman yang sama dengan parameter Welch yang sama.
 
 **[BELUM DITENTUKAN]** pita evaluasi delay grup, parameter Welch (`nperseg`, overlap, window), dan definisi kuantitatif “lubang” envelope. Ketiganya ditetapkan sebelum pengujian.
@@ -223,52 +223,52 @@ Classifier tidak harus menerima setiap sampel secara terpisah. Sinyal dapat diba
 
 Analogi sederhananya adalah merangkum satu paragraf. Ringkasan membantu pembaca menangkap pola, tetapi selalu membuang sebagian detail. Fitur juga demikian.
 
-**Usulan desain:** jendela kausal 200 ms dengan hop 50 ms. Jumlah sampel \(N\) dan hop dihitung dari fs aktual. Input fitur pada mode raw adalah sinyal terfilter \(y[n]\) sebelum penyearahan, setelah koreksi baseline.
+**Usulan desain:** jendela kausal 200 ms dengan hop 50 ms. Jumlah sampel $N$ dan hop dihitung dari fs aktual. Input fitur pada mode raw adalah sinyal terfilter $y[n]$ sebelum penyearahan, setelah koreksi baseline.
 
-Untuk satu jendela berisi $$\(N\)$$ sampel $$\(x[n]\)$$, fitur yang diwajibkan adalah sebagai berikut [6].
+Untuk satu jendela berisi $N$ sampel $x[n]$, fitur yang diwajibkan adalah sebagai berikut [6].
 
 ### Mean Absolute Value — MAV
+
 $$
-\[
 MAV=\frac{1}{N}\sum_{n=1}^{N}|x[n]|.
-\]
 $$
+
 MAV adalah rata-rata besar amplitudo tanpa memperhatikan tanda positif atau negatif. Nilai ini membantu menggambarkan seberapa besar aktivitas dalam satu jendela.
 
 ### Root Mean Square — RMS
+
 $$
-\[
 RMS=\sqrt{\frac{1}{N}\sum_{n=1}^{N}x[n]^2}.
-\]
 $$
+
 RMS menguadratkan amplitudo, menghitung rata-ratanya, lalu mengambil akar. Sampel beramplitudo besar mendapat penekanan lebih kuat.
 
 MAV dan RMS sama-sama menggambarkan amplitudo sehingga keduanya dapat saling berkorelasi.
 
 ### Waveform Length — WL
+
 $$
-\[
 WL=\sum_{n=2}^{N}|x[n]-x[n-1]|.
-\]
 $$
+
 WL menjumlahkan perubahan antar-sampel. Bayangkan mengikuti garis grafik dan mencatat setiap kenaikan serta penurunannya.
 
 WL bukan panjang geometris kurva dalam satuan waktu–amplitudo. Nilainya dipengaruhi panjang jendela, sampling, dan pemrosesan sinyal. Karena itu WL tidak diubah menjadi rata-rata tanpa memperbarui dokumentasi dan melatih ulang model.
 
 ### Zero Crossing — ZC
+
 $$
-\[
 ZC=\sum_{n=2}^{N}\mathbf{1}\left(x[n]x[n-1]<0\land|x[n]-x[n-1]|>thr\right).
-\]
 $$
+
 ZC menghitung pergantian tanda yang memenuhi ambang perubahan amplitudo.
-$$
-- \(\mathbf{1}\): bernilai 1 jika kondisi benar, selain itu 0.
-- \(thr\): ambang untuk membatasi crossing kecil yang dapat berasal dari noise.
-$$
+
+- $\mathbf{1}$: bernilai 1 jika kondisi benar, selain itu 0.
+- $thr$: ambang untuk membatasi crossing kecil yang dapat berasal dari noise.
+
 Ambang mempunyai satuan yang sama dengan amplitudo input. Untuk raw EMG, crossing diperiksa terhadap baseline yang sudah dikoreksi. Envelope nonnegatif tidak memberikan informasi crossing yang sama.
 
-**[BELUM DITENTUKAN]** definisi baseline dan cara menentukan $$\(thr\)$$ dari data latih (misalnya kelipatan simpangan baku segmen relax). Nilai akhir disimpan di berkas model (Bagian 10.4).
+**[BELUM DITENTUKAN]** definisi baseline dan cara menentukan $thr$ dari data latih (misalnya kelipatan simpangan baku segmen relax). Nilai akhir disimpan di berkas model (Bagian 10.4).
 
 ### Urutan fitur (kontrak)
 
@@ -293,34 +293,31 @@ Sebaran yang terpisah pada data latih belum membuktikan model akan bekerja pada 
 ## 7. Tahap ketiga (bagian 2): regresi logistik, dari fitur menjadi probabilitas grip
 
 Empat fitur digabungkan menjadi:
+
 $$
-\[
 \mathbf{v}=[MAV,RMS,WL,ZC].
-\]
 $$
-**[BELUM DITENTUKAN]** definisi baseline dan cara menentukan $$\(thr\)$$ dari data latih (misalnya kelipatan simpangan baku segmen relax). Nilai akhir disimpan di berkas model (Bagian 10.4).
 
 Karena skala setiap fitur dapat berbeda, standardisasi digunakan:
+
 $$
-\[
 \tilde v_j=\frac{v_j-\mu_j}{s_j}.
-\]
 $$
-Rata-rata $$\(\mu_j\)$$ dan skala $$\(s_j\)$$ berasal dari data latih. Data validasi menggunakan parameter yang sama [4]. Fitur yang konstan pada data latih diberi skala 1, seperti perilaku StandardScaler [4].
+
+Rata-rata $\mu_j$ dan skala $s_j$ berasal dari data latih. Data validasi menggunakan parameter yang sama [4]. Fitur yang konstan pada data latih diberi skala 1, seperti perilaku StandardScaler [4].
 
 Model kemudian menghitung:
+
 $$
-\[
 z=b_0+\sum_{j=1}^{4}w_j\tilde v_j,
 \qquad
 P(grip)=\frac{1}{1+e^{-z}}.
-\]
 $$
-$$
-- \(b_0\): intersep;
-- \(w_j\): bobot fitur;
-- \(P(grip)\): keluaran probabilitas model untuk kelas grip.
-$$
+
+- $b_0$: intersep;
+- $w_j$: bobot fitur;
+- $P(grip)$: keluaran probabilitas model untuk kelas grip.
+
 Model dapat dibayangkan sebagai penggabung empat petunjuk. Bobot menunjukkan cara petunjuk tersebut digabungkan setelah pelatihan.
 
 Bobot bukan persentase kontribusi dan tidak otomatis menjelaskan sebab fisiologis. Fitur yang berkorelasi dapat memengaruhi besar maupun tanda koefisien.
@@ -330,16 +327,16 @@ Bobot bukan persentase kontribusi dan tidak otomatis menjelaskan sebab fisiologi
 ### Pembanding: satu ambang MAV
 
 Pembanding sederhana menggunakan:
+
 $$
-\[
 \hat y=
 \begin{cases}
 1,&MAV>T,\\
 0,&MAV\leq T.
 \end{cases}
-\]
 $$
-Ambang $$\(T\)$$ ditentukan dari data latih pada fold yang sama.
+
+Ambang $T$ ditentukan dari data latih pada fold yang sama.
 
 Perbandingan ini menjawab apakah model empat fitur memberi manfaat terhadap aturan amplitudo tunggal. Kedua metode harus diuji pada pembagian data yang sama.
 
@@ -358,16 +355,16 @@ Probabilitas dapat berubah di dekat batas keputusan. Jika servo mengikuti setiap
 ### Histeresis (wajib tugas)
 
 Instruksi menetapkan [6]:
+
 $$
-\[
 h_t=
 \begin{cases}
 1,&P_t>0{,}6,\\
 0,&P_t<0{,}4,\\
 h_{t-1},&0{,}4\leq P_t\leq0{,}6.
 \end{cases}
-\]
 $$
+
 Histeresis memberi dua batas:
 
 - probabilitas cukup tinggi untuk beralih ke grip;
@@ -379,21 +376,21 @@ Ini menyerupai pintu yang membutuhkan dorongan lebih kuat untuk berpindah posisi
 ### Voting
 
 Voting mengambil keputusan mayoritas dari beberapa kandidat state terbaru:
+
 $$
-\[
 q_t=\mathbf{1}\left(\sum_{i=0}^{m-1}c_{t-i}>\frac{m}{2}\right).
-\]
 $$
-Di sini $$\(c_t\)$$ adalah kandidat biner dan $$\(m\)$$ panjang riwayat.
+
+Di sini $c_t$ adalah kandidat biner dan $m$ panjang riwayat.
 
 **Usulan desain:**
 
-- Kandidat $$\(c_t = h_t\)$$, yaitu keluaran histeresis. Urutannya: probabilitas → histeresis → voting → state servo.
-- $$\(m = 3\)$$. Panjang ganjil dipilih agar tidak ada seri.
-- Kondisi awal $$\(h_0 = 0\)$$ (relax). Selama riwayat belum berisi $$\(m\)$$ kandidat, state tetap relax (S45).
+- Kandidat $c_t = h_t$, yaitu keluaran histeresis. Urutannya: probabilitas → histeresis → voting → state servo.
+- $m = 3$. Panjang ganjil dipilih agar tidak ada seri.
+- Kondisi awal $h_0 = 0$ (relax). Selama riwayat belum berisi $m$ kandidat, state tetap relax (S45).
 - Perintah servo hanya dikirim saat state berubah.
 
-Voting meningkatkan kestabilan dengan menambahkan waktu tunggu sekitar $$\((m-1)\)$$ hop. Karena itu, panjang voting dinilai bersama latensi dan gerakan salah. **[BELUM DITENTUKAN]** nilai $$\(m\)$$ final.
+Voting meningkatkan kestabilan dengan menambahkan waktu tunggu sekitar $(m-1)$ hop. Karena itu, panjang voting dinilai bersama latensi dan gerakan salah. **[BELUM DITENTUKAN]** nilai $m$ final.
 
 ## 9. Dari keputusan ke servo dan fallback
 
@@ -711,7 +708,7 @@ Gunakan pembagian berbasis blok atau kelompok yang sesuai [4]:
 1. Tetapkan blok sebelum membuat jendela.
 2. Pertahankan seluruh jendela satu blok dalam partisi yang sama.
 3. Hindari jendela yang menyeberangi batas partisi.
-4. Fit scaler, \(thr\) ZC, dan ambang MAV hanya pada train.
+4. Fit scaler, $thr$ ZC, dan ambang MAV hanya pada train.
 5. Gunakan split yang sama untuk logistik dan pembanding MAV.
 
 **Usulan desain:** CV 4-fold berbasis grup (subjek + blok) pada sesi 1, dengan syarat setiap fold berisi kedua kelas. **[BELUM DITENTUKAN]** jumlah fold final dan seed. Indeks fold disimpan di `outputs/metrics/cv_folds.csv` agar dapat diaudit.
@@ -782,9 +779,9 @@ Jika ADC aktual berbeda dari acuan 10-bit, jelaskan rentang native dan pemetaann
 
 Akurasi:
 
-\[
+$$
 Accuracy=\frac{TP+TN}{TP+TN+FP+FN}.
-\]
+$$
 
 Grip adalah kelas positif sesuai encoding usulan (Bagian 7). Confusion matrix membantu membedakan grip yang terlewat dan relax yang salah dianggap grip.
 
@@ -792,9 +789,9 @@ Latensi tugas diukur dari **onset kontraksi hingga awal gerak jari**. Waktu samp
 
 Keberhasilan genggam:
 
-\[
+$$
 Success=\frac{n_\mathrm{berhasil}}{n_\mathrm{uji}}\times100\%.
-\]
+$$
 
 **[BELUM DITENTUKAN]**, dan wajib ditetapkan sebelum uji:
 
